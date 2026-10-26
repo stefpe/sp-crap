@@ -1,10 +1,36 @@
 # sp-crap-check
 
-Zero-dependency PHP CLI to gate PHPUnit **crap4j** reports on CRAP score — compatible with [php-crap-checker](https://github.com/LucianoVandi/php-crap-checker), plus JSON config and ignore rules.
+Zero-dependency PHP CLI to gate PHPUnit **crap4j** reports on CRAP score, with JSON config and ignore rules.
 
 **Requirements:** PHP 8.3+ (8.5 compatible), `ext-simplexml`
 
-## Install from release
+## Install with Composer
+
+Project dependency (typical for CI):
+
+```bash
+composer require --dev stefpe/sp-crap
+vendor/bin/sp-crap-check check var/coverage/crap4j.xml --threshold=30
+```
+
+Global binary:
+
+```bash
+composer global require stefpe/sp-crap
+~/.composer/vendor/bin/sp-crap-check --version
+```
+
+Ensure Composer’s global `vendor/bin` is on your `PATH`.
+
+Install from GitHub before [Packagist](https://packagist.org) (if needed):
+
+```bash
+composer require --dev stefpe/sp-crap:^1.1
+```
+
+Composer resolves `stefpe/sp-crap` from GitHub automatically once the package is public.
+
+## Install from release (PHAR)
 
 ```bash
 curl -fsSL https://github.com/stefpe/sp-crap/releases/latest/download/sp-crap-check.phar \
@@ -59,6 +85,7 @@ CLI flags override config. `--config=/path/to.json` selects a file; otherwise `.
 ## Development
 
 ```bash
-php sp-crap-check check tests/fixtures/crap4j.xml --threshold=30
+composer install
+composer exec sp-crap-check check path/to/crap4j.xml --threshold=30
 php -d phar.readonly=0 tools/build-phar.php
 ```

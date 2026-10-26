@@ -6,7 +6,7 @@ namespace SpCrap;
 
 final class Application
 {
-    private const string VERSION = '1.1.0';
+    private const string VERSION = '1.1.1';
 
     /**
      * @param list<string> $argv

@@ -1,0 +1,25 @@
+{
+    "name": "stefpe/sp-crap",
+    "description": "CLI quality gate for PHPUnit crap4j reports (CRAP score threshold, JSON config, ignores).",
+    "license": "MIT",
+    "type": "library",
+    "require": {
+        "php": ">=8.3",
+        "ext-simplexml": "*"
+    },
+    "suggest": {
+        "ext-pcov": "Generate PHPUnit coverage with PCOV.",
+        "ext-xdebug": "Generate PHPUnit coverage with Xdebug."
+    },
+    "autoload": {
+        "psr-4": {
+            "SpCrap\\": "src/"
+        }
+    },
+    "bin": [
+        "sp-crap-check"
+    ],
+    "config": {
+        "sort-packages": true
+    }
+}
