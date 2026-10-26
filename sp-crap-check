@@ -1,0 +1,19 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+/**
+ * SPDX-License-Identifier: MIT
+ *
+ * Zero-dependency CRAP4J checker for PHPUnit coverage reports.
+ */
+
+if (PHP_VERSION_ID < 80300) {
+    fwrite(STDERR, "sp-crap-check requires PHP 8.3 or newer.\n");
+    exit(2);
+}
+
+require __DIR__ . '/src/bootstrap.php';
+
+exit(SpCrap\Application::run($_SERVER['argv'] ?? []));

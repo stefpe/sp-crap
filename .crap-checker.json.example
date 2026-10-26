@@ -1,0 +1,15 @@
+{
+  "report": "var/coverage/crap4j.xml",
+  "threshold": 30,
+  "max_violations": 111,
+  "format": "text",
+  "ignore_files": [
+    "src/Mapper/Sustainability/EvdbVehiclesMapper.php"
+  ],
+  "ignore_classes": [
+    "App\\Legacy\\*"
+  ],
+  "ignore_methods": [
+    "App\\Service\\OrderImporter::import"
+  ]
+}
