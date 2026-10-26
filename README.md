@@ -74,6 +74,14 @@ Or download the `.zip` asset, extract, and run `php sp-crap-check` from the fold
 php -d pcov.enabled=1 vendor/bin/phpunit …
 ```
 
+**DDEV:** PCOV is not in the default web image. Add the package for your PHP version in `.ddev/config.yaml`, then rebuild:
+
+```yaml
+webimage_extra_packages: [php8.5-pcov]
+```
+
+Use `php8.4-pcov`, `php8.5-pcov`, etc. to match `php_version` in the same file. Apply the change with `ddev restart` (or `ddev debug rebuild` if the extension does not show up). Inside the container, run PHPUnit with `php -d pcov.enabled=1 …` as above.
+
 **2. Crap4J output** — either add it to `phpunit.xml` / `phpunit.xml.dist`:
 
 ```xml
