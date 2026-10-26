@@ -6,7 +6,7 @@ namespace SpCrap;
 
 final class Application
 {
-    private const string VERSION = '1.1.4';
+    private const string VERSION = '1.1.5';
 
     public static function version(): string
     {

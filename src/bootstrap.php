@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+require __DIR__ . '/AsciiLogo.php';
 require __DIR__ . '/Branding.php';
 require __DIR__ . '/MethodMetric.php';
 require __DIR__ . '/Config.php';

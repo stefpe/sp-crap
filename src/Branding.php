@@ -98,21 +98,23 @@ final class Branding
 
     private static function writeAsciiLogo(Io $io): void
     {
-        $lines = [
-            ['text' => '    ╭──────╮', 'color' => '36'],
-            ['text' => ' ╭──┤  S   ├──────────╮', 'color' => '36'],
-            ['text' => ' │  ╰──────╯    C      │· · □', 'color' => '34'],
-            ['text' => ' │         ╲___________╱', 'color' => '34'],
-            ['text' => ' ╰─────────────────────╯', 'color' => '35'],
-            ['text' => '      S P - C R A P', 'color' => '35'],
-            ['text' => '  change-risk gate for PHPUnit', 'color' => '90'],
-        ];
+        $color = self::logoColorEnabled();
 
-        foreach ($lines as $line) {
-            $io->brandRaw($line['text'], $line['color']);
+        foreach (AsciiLogo::lines() as $line) {
+            $io->writeln(AsciiLogo::renderLine($line, $color));
         }
 
+        $io->brandMuted('  PHPUnit crap4j change-risk gate');
         $io->brandMuted(sprintf('  v%s · https://github.com/stefpe/sp-crap', Application::version()));
         $io->writeln('');
+    }
+
+    private static function logoColorEnabled(): bool
+    {
+        if (getenv('NO_COLOR') !== false) {
+            return false;
+        }
+
+        return function_exists('posix_isatty') && posix_isatty(STDOUT);
     }
 }
