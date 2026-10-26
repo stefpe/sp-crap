@@ -4,6 +4,30 @@ Zero-dependency PHP CLI to gate PHPUnit **crap4j** reports on CRAP score, with J
 
 **Requirements:** PHP 8.3+ (8.5 compatible), `ext-simplexml`
 
+## What is CRAP?
+
+**CRAP** (Change Risk Anti-Patterns) is a per-method score that combines **cyclomatic complexity** (how many branches and paths exist) with **line coverage** from your tests. Intuitively: a method that is hard to follow and rarely executed by tests is expensive and risky to change.
+
+PHPUnit’s crap4j report uses a formula in this family (per method *m*, complexity `comp`, coverage percent `cov`):
+
+```
+CRAP(m) = comp(m)² × (1 - cov(m)/100)³ + comp(m)
+```
+
+Simple or well-covered methods stay near **1**. Scores climb when complexity grows and coverage drops—exactly the methods where regressions hide and refactors hurt.
+
+### Why use it with AI-assisted development?
+
+Agents and copilots can add features quickly: new branches, edge cases, and “just one more” helper in an already dense method. Unit tests and static analysis often still pass while **change risk** piles up method by method. A green build does not mean the next prompt-driven edit is safe.
+
+Running `sp-crap-check` after coverage gives you a cheap, objective gate:
+
+- Surfaces **untested complex code** before merge, not after production surprises.
+- Works at **method granularity**, where agents tend to edit, not only at file or project coverage %.
+- **`max_violations`** lets legacy debt coexist with a ratchet: new hot spots must be fixed or traded for old ones.
+
+CRAP is a signal for review and testing focus, not a moral score. Use it to decide where humans (or agents) should add tests or simplify logic—not to chase a number with meaningless assertions.
+
 ## Install with Composer
 
 Project dependency (typical for CI):
@@ -40,9 +64,47 @@ chmod +x /usr/local/bin/sp-crap-check
 
 Or download the `.zip` asset, extract, and run `php sp-crap-check` from the folder.
 
+## PHPUnit setup (required first)
+
+`sp-crap-check` only **reads** a Crap4J XML file. It does not run tests or compute coverage. You must configure **PHPUnit** to emit crap4j on every run where you gate CRAP (local, CI, or agent workflows).
+
+**1. Coverage driver** — PHPUnit needs **PCOV** or **Xdebug** with coverage enabled, for example:
+
+```bash
+php -d pcov.enabled=1 vendor/bin/phpunit …
+```
+
+**2. Crap4J output** — either add it to `phpunit.xml` / `phpunit.xml.dist`:
+
+```xml
+<phpunit …>
+    <coverage>
+        <report>
+            <crap4j outputFile="var/coverage/crap4j.xml" threshold="30"/>
+        </report>
+    </coverage>
+</phpunit>
+```
+
+(`threshold` on the element is for PHPUnit’s stats in the XML; `sp-crap-check` uses its own `--threshold` / config.)
+
+**Or** pass the path on the command line (no XML change):
+
+```bash
+php -d pcov.enabled=1 vendor/bin/phpunit --coverage-crap4j var/coverage/crap4j.xml
+```
+
+Use the **same path** in `sp-crap-check` or in `.crap-checker.json` → `"report"`. Run `sp-crap-check doctor` to confirm PHPUnit config and report path.
+
+**Typical pipeline:**
+
+```text
+PHPUnit (with PCOV/Xdebug) → writes var/coverage/crap4j.xml → sp-crap-check check …
+```
+
 ## Usage
 
-After PHPUnit writes crap4j:
+After PHPUnit has produced crap4j:
 
 ```bash
 php -d pcov.enabled=1 vendor/bin/phpunit --coverage-crap4j var/coverage/crap4j.xml
