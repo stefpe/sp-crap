@@ -144,21 +144,6 @@ sp-crap-check check -v
 sp-crap-check doctor
 ```
 
-### Branding & ASCII logo
-
-Text mode prints a compact **SP-CRAP** banner by default and a short footer with exit status. The stylized logo from `docs/logo.jpg` is rendered as **ASCII art** when any of these apply:
-
-- `-v` / `--verbose`
-- `--logo`
-- `SP_CRAP_LOGO=1` in the environment
-
-Use `-q` / `--quiet` or `--format=json` for CI logs without branding.
-
-```bash
-sp-crap-check check var/coverage/crap4j.xml --logo
-SP_CRAP_LOGO=1 sp-crap-check doctor
-```
-
 ### CRAP scope: all methods (default)
 
 Uncle Bob’s **CRAP** score applies to **every** function and method PHPUnit measures—`public`, `protected`, `private`, and package-private alike. **SP-CRAP follows that by default:** every entry in the crap4j report is eligible for the threshold.
