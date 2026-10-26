@@ -146,6 +146,22 @@ sp-crap-check check var/coverage/crap4j.xml --logo
 SP_CRAP_LOGO=1 sp-crap-check doctor
 ```
 
+### Public API only (default)
+
+Crap4j lists **every** method PHPUnit measured, including `private` and `protected` helpers. Those are implementation details: they are not part of your outward contract and often should not count as merge-blocking violations.
+
+**SP-CRAP filters to `public` methods only** (via reflection, after loading your project’s `vendor/autoload.php`). Private/protected methods are skipped from analysis and violation counts. That avoids inflated reports—for example, a gate that shows 17 violations when several are private helpers that other tools still list.
+
+To match legacy “count everything in the XML” behaviour:
+
+```bash
+sp-crap-check check --include-non-public
+```
+
+Or in JSON: `"public_methods_only": false` (alias: `"include_non_public": true`).
+
+`-v` prints how many non-public methods were skipped.
+
 ### Config (JSON)
 
 | Key | Description |
@@ -153,6 +169,7 @@ SP_CRAP_LOGO=1 sp-crap-check doctor
 | `report` | Default path to crap4j.xml |
 | `threshold` | Max CRAP per method (default `30`) |
 | `max_violations` | Ratchet: allow N methods over threshold |
+| `public_methods_only` | Skip private/protected (default `true`) |
 | `ignore_files` / `ignore_coverage_files` | Path globs |
 | `ignore_classes` | FQCN globs (`App\\Legacy\\*`) |
 | `ignore_methods` | `Class::method`, `Class::*`, or method name |

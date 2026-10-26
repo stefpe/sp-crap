@@ -6,7 +6,7 @@ namespace SpCrap;
 
 final class Application
 {
-    private const string VERSION = '1.1.2';
+    private const string VERSION = '1.1.3';
 
     public static function version(): string
     {
@@ -57,6 +57,7 @@ final class Application
             'verbose' => false,
             'quiet' => false,
             'logo' => false,
+            'include-non-public' => false,
             'config' => null,
         ];
 
@@ -78,6 +79,12 @@ final class Application
 
             if ($arg === '--logo') {
                 $options['logo'] = true;
+
+                continue;
+            }
+
+            if ($arg === '--include-non-public') {
+                $options['include-non-public'] = true;
 
                 continue;
             }
@@ -201,6 +208,11 @@ final class Application
         $format = $options['format'] ?? $fileConfig->format ?? 'text';
         $maxViolations = $options['max-violations'] ?? ($fileConfig->maxViolations !== null ? (string) $fileConfig->maxViolations : null);
         $maxAge = $options['max-age'] ?? $fileConfig->maxAge;
+        $publicMethodsOnly = $fileConfig->publicMethodsOnly;
+
+        if ($options['include-non-public']) {
+            $publicMethodsOnly = false;
+        }
 
         $runOptions = [
             'threshold' => $threshold,
@@ -210,6 +222,7 @@ final class Application
             'verbose' => $options['verbose'],
             'quiet' => $options['quiet'],
             'logo' => $options['logo'],
+            'public_methods_only' => $publicMethodsOnly,
             'ignore_matcher' => new IgnoreMatcher(
                 $fileConfig->ignoreFiles,
                 $fileConfig->ignoreClasses,
@@ -284,13 +297,14 @@ final class Application
         $io->writeln('  --format=FORMAT        text or json (default: text)');
         $io->writeln('  -v, --verbose          Extra summary + ASCII logo');
         $io->writeln('  --logo                 ASCII logo (also SP_CRAP_LOGO=1)');
+        $io->writeln('  --include-non-public   Gate private/protected methods too');
         $io->writeln('  -q, --quiet            No branding output');
         $io->writeln('  -h, --help             Show this help');
         $io->writeln('  -V, --version          Show version');
         $io->writeln('');
         $io->writeln('Config file (.crap-checker.json):');
         $io->writeln('  report, threshold, max_violations, format, max_age');
-        $io->writeln('  ignore_files, ignore_classes, ignore_methods');
+        $io->writeln('  ignore_files, ignore_classes, ignore_methods, public_methods_only');
         $io->writeln('  (ignore_coverage_files is an alias for ignore_files)');
         $io->writeln('');
         $io->writeln('Examples:');

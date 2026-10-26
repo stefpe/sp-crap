@@ -3,6 +3,7 @@
   "threshold": 30,
   "max_violations": 111,
   "format": "text",
+  "public_methods_only": true,
   "ignore_files": [
     "src/Mapper/Sustainability/EvdbVehiclesMapper.php"
   ],

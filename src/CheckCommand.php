@@ -124,9 +124,15 @@ final class CheckCommand
         }
 
         [$checkedMethods, $ignoredCount] = $this->filterIgnored($methods, $matcher);
+        $nonPublicSkipped = 0;
+
+        if ((bool) ($options['public_methods_only'] ?? true)) {
+            ProjectAutoload::registerFromWorkingDirectory();
+            [$checkedMethods, $nonPublicSkipped] = (new PublicMethodFilter())->filterToPublicOnly($checkedMethods);
+        }
 
         if ($checkedMethods === []) {
-            $io->comment('No methods left to check after ignore rules.');
+            $io->comment('No methods left to check after ignore and visibility rules.');
             $exitCode = self::EXIT_NO_METHODS;
             Branding::emitClosing($io, $options, $format, $exitCode);
 
@@ -142,6 +148,8 @@ final class CheckCommand
                 count($methods),
                 count($checkedMethods),
                 $ignoredCount,
+                $nonPublicSkipped,
+                (bool) ($options['public_methods_only'] ?? true),
                 $violations,
                 $exitCode,
                 $maxViolations,
@@ -158,6 +166,7 @@ final class CheckCommand
             count($methods),
             count($checkedMethods),
             $ignoredCount,
+            $nonPublicSkipped,
             $verbose,
             $exitCode,
         );
@@ -199,6 +208,7 @@ final class CheckCommand
         int $totalMethods,
         int $checkedMethods,
         int $ignoredCount,
+        int $nonPublicSkipped,
         bool $verbose,
         int $exitCode,
     ): int {
@@ -212,14 +222,19 @@ final class CheckCommand
                 $io->writeln(sprintf('Ignored methods: %d', $ignoredCount));
             }
 
+            if ($nonPublicSkipped > 0) {
+                $io->writeln(sprintf('Skipped non-public methods: %d', $nonPublicSkipped));
+            }
+
             $io->writeln('Violations: 0');
 
             if ($verbose) {
                 $io->writeln(sprintf(
-                    'Report: %d methods in file, %d checked, %d ignored, 0 above threshold %s.',
+                    'Report: %d methods in file, %d checked, %d ignored, %d non-public skipped, 0 above threshold %s.',
                     $totalMethods,
                     $checkedMethods,
                     $ignoredCount,
+                    $nonPublicSkipped,
                     $thresholdLabel,
                 ));
             }
@@ -244,6 +259,10 @@ final class CheckCommand
 
             if ($ignoredCount > 0) {
                 $io->writeln(sprintf('Ignored methods: %d', $ignoredCount));
+            }
+
+            if ($nonPublicSkipped > 0) {
+                $io->writeln(sprintf('Skipped non-public methods: %d', $nonPublicSkipped));
             }
 
             if ($maxViolations !== null) {
@@ -352,6 +371,8 @@ final class CheckCommand
         int $totalMethods,
         int $checkedMethods,
         int $ignoredCount,
+        int $nonPublicSkipped,
+        bool $publicMethodsOnly,
         array $violations,
         int $exitCode,
         ?int $maxViolations,
@@ -361,6 +382,8 @@ final class CheckCommand
             'methods_in_report' => $totalMethods,
             'analyzed' => $checkedMethods,
             'ignored' => $ignoredCount,
+            'skipped_non_public' => $nonPublicSkipped,
+            'public_methods_only' => $publicMethodsOnly,
             'violations' => count($violations),
             'passed' => $exitCode === self::EXIT_SUCCESS,
             'max_violations' => $maxViolations,

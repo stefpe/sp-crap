@@ -20,6 +20,7 @@ final readonly class Config
         public array $ignoreFiles = [],
         public array $ignoreClasses = [],
         public array $ignoreMethods = [],
+        public bool $publicMethodsOnly = true,
     ) {
     }
 
@@ -48,6 +49,16 @@ final readonly class Config
         $format = isset($data['format']) && is_string($data['format']) ? $data['format'] : null;
         $maxAge = isset($data['max_age']) && is_string($data['max_age']) ? $data['max_age'] : null;
 
+        $publicMethodsOnly = true;
+
+        if (array_key_exists('public_methods_only', $data)) {
+            $publicMethodsOnly = (bool) $data['public_methods_only'];
+        }
+
+        if (array_key_exists('include_non_public', $data)) {
+            $publicMethodsOnly = !(bool) $data['include_non_public'];
+        }
+
         return new self(
             report: $report,
             threshold: $threshold,
@@ -57,6 +68,7 @@ final readonly class Config
             ignoreFiles: $ignoreFiles,
             ignoreClasses: $ignoreClasses,
             ignoreMethods: $ignoreMethods,
+            publicMethodsOnly: $publicMethodsOnly,
         );
     }
 
