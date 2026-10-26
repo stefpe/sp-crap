@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/logo.jpg" alt="SP-CRAP logo" width="280">
+</p>
+
 # sp-crap-check
 
 Zero-dependency PHP CLI to gate PHPUnit **crap4j** reports on CRAP score, with JSON config and ignore rules.
@@ -125,6 +129,21 @@ With a project config file `.crap-checker.json` (see `.crap-checker.json.example
 ```bash
 sp-crap-check check -v
 sp-crap-check doctor
+```
+
+### Branding & ASCII logo
+
+Text mode prints a compact **SP-CRAP** banner by default and a short footer with exit status. The stylized logo from `docs/logo.jpg` is rendered as **ASCII art** when any of these apply:
+
+- `-v` / `--verbose`
+- `--logo`
+- `SP_CRAP_LOGO=1` in the environment
+
+Use `-q` / `--quiet` or `--format=json` for CI logs without branding.
+
+```bash
+sp-crap-check check var/coverage/crap4j.xml --logo
+SP_CRAP_LOGO=1 sp-crap-check doctor
 ```
 
 ### Config (JSON)

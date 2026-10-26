@@ -84,11 +84,16 @@ final class CheckCommand
             $staleExit = $this->checkReportAge($reportPath, $maxAgeSeconds, $io);
 
             if ($staleExit !== null) {
+                Branding::emitOpening($io, $options, $format);
+                Branding::emitClosing($io, $options, $format, $staleExit);
+
                 return $staleExit;
             }
         }
 
         $threshold = (float) $thresholdRaw;
+
+        Branding::emitOpening($io, $options, $format);
 
         try {
             $methods = (new Crap4jParser())->parse($reportPath);
@@ -98,25 +103,34 @@ final class CheckCommand
             $io->writeln('Generate it with:');
             $io->writeln('php -d pcov.enabled=1 vendor/bin/phpunit --coverage-crap4j build/crap4j.xml');
 
-            return self::EXIT_REPORT_NOT_FOUND;
+            $exitCode = self::EXIT_REPORT_NOT_FOUND;
+            Branding::emitClosing($io, $options, $format, $exitCode);
+
+            return $exitCode;
         } catch (InvalidReportException $e) {
             $io->error($e->getMessage());
+            $exitCode = self::EXIT_INVALID_XML;
+            Branding::emitClosing($io, $options, $format, $exitCode);
 
-            return self::EXIT_INVALID_XML;
+            return $exitCode;
         }
 
         if ($methods === []) {
             $io->comment('No methods found in report.');
+            $exitCode = self::EXIT_NO_METHODS;
+            Branding::emitClosing($io, $options, $format, $exitCode);
 
-            return self::EXIT_NO_METHODS;
+            return $exitCode;
         }
 
         [$checkedMethods, $ignoredCount] = $this->filterIgnored($methods, $matcher);
 
         if ($checkedMethods === []) {
             $io->comment('No methods left to check after ignore rules.');
+            $exitCode = self::EXIT_NO_METHODS;
+            Branding::emitClosing($io, $options, $format, $exitCode);
 
-            return self::EXIT_NO_METHODS;
+            return $exitCode;
         }
 
         $violations = (new CrapAnalyzer())->findViolations($checkedMethods, $threshold);
@@ -136,7 +150,7 @@ final class CheckCommand
             return $exitCode;
         }
 
-        return $this->renderText(
+        $exitCode = $this->renderText(
             $io,
             $violations,
             $threshold,
@@ -147,6 +161,9 @@ final class CheckCommand
             $verbose,
             $exitCode,
         );
+        Branding::emitClosing($io, $options, $format, $exitCode);
+
+        return $exitCode;
     }
 
     /**

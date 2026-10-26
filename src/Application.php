@@ -6,7 +6,12 @@ namespace SpCrap;
 
 final class Application
 {
-    private const string VERSION = '1.1.1';
+    private const string VERSION = '1.1.2';
+
+    public static function version(): string
+    {
+        return self::VERSION;
+    }
 
     /**
      * @param list<string> $argv
@@ -17,19 +22,23 @@ final class Application
         $args = array_slice($argv, 1);
 
         if ($args === [] || in_array($args[0], ['-h', '--help', 'help'], true)) {
+            Branding::emitForDoctor($io, ['logo' => true]);
             self::printHelp($io);
 
             return CheckCommand::EXIT_SUCCESS;
         }
 
         if (in_array($args[0], ['-V', '--version', 'version'], true)) {
-            $io->writeln('sp-crap-check ' . self::VERSION);
+            Branding::emitForDoctor($io, []);
 
             return CheckCommand::EXIT_SUCCESS;
         }
 
         if ($args[0] === 'doctor') {
-            return (new DoctorCommand())->run($io);
+            array_shift($args);
+            $doctorOptions = self::parseBrandingOptions($args);
+
+            return (new DoctorCommand())->run($io, $doctorOptions);
         }
 
         $positional = [];
@@ -46,6 +55,8 @@ final class Application
             'max-violations' => null,
             'max-age' => null,
             'verbose' => false,
+            'quiet' => false,
+            'logo' => false,
             'config' => null,
         ];
 
@@ -59,7 +70,14 @@ final class Application
             }
 
             if ($arg === '-q' || $arg === '--quiet') {
+                $options['quiet'] = true;
                 $options['verbose'] = false;
+
+                continue;
+            }
+
+            if ($arg === '--logo') {
+                $options['logo'] = true;
 
                 continue;
             }
@@ -190,6 +208,8 @@ final class Application
             'max-violations' => $maxViolations,
             'max-age' => $maxAge,
             'verbose' => $options['verbose'],
+            'quiet' => $options['quiet'],
+            'logo' => $options['logo'],
             'ignore_matcher' => new IgnoreMatcher(
                 $fileConfig->ignoreFiles,
                 $fileConfig->ignoreClasses,
@@ -207,6 +227,31 @@ final class Application
     /**
      * @param list<string> $args
      */
+    /**
+     * @param list<string> $args
+     * @return array{verbose: bool, quiet: bool, logo: bool}
+     */
+    private static function parseBrandingOptions(array $args): array
+    {
+        $options = ['verbose' => false, 'quiet' => false, 'logo' => false];
+
+        foreach ($args as $arg) {
+            if ($arg === '-v' || $arg === '--verbose') {
+                $options['verbose'] = true;
+            }
+
+            if ($arg === '-q' || $arg === '--quiet') {
+                $options['quiet'] = true;
+            }
+
+            if ($arg === '--logo') {
+                $options['logo'] = true;
+            }
+        }
+
+        return $options;
+    }
+
     private static function optionalValue(array $args, int &$index, string $name, Io $io): ?string
     {
         if (!isset($args[$index + 1]) || str_starts_with($args[$index + 1], '-')) {
@@ -237,7 +282,9 @@ final class Application
         $io->writeln('  --max-violations=NUM   Allow up to NUM methods above threshold (ratchet)');
         $io->writeln('  --max-age=DURATION     Fail if report is older than DURATION (60, 30m, 2h)');
         $io->writeln('  --format=FORMAT        text or json (default: text)');
-        $io->writeln('  -v, --verbose          Extra summary output');
+        $io->writeln('  -v, --verbose          Extra summary + ASCII logo');
+        $io->writeln('  --logo                 ASCII logo (also SP_CRAP_LOGO=1)');
+        $io->writeln('  -q, --quiet            No branding output');
         $io->writeln('  -h, --help             Show this help');
         $io->writeln('  -V, --version          Show version');
         $io->writeln('');
@@ -302,6 +349,42 @@ final class Io
         }
 
         return "\033[" . $color . 'm[' . $label . "]\033[0m";
+    }
+
+    public function brandTitle(string $text): string
+    {
+        if (!self::useColor()) {
+            return $text;
+        }
+
+        return "\033[1;36m" . $text . "\033[0m";
+    }
+
+    public function brandLine(string $line): void
+    {
+        $this->writeln($line);
+    }
+
+    public function brandRaw(string $line, string $color = '36'): void
+    {
+        if (!self::useColor()) {
+            $this->writeln($line);
+
+            return;
+        }
+
+        fwrite(STDOUT, "\033[" . $color . 'm' . $line . "\033[0m" . PHP_EOL);
+    }
+
+    public function brandMuted(string $line): void
+    {
+        if (!self::useColor()) {
+            $this->writeln($line);
+
+            return;
+        }
+
+        fwrite(STDOUT, "\033[2;90m" . $line . "\033[0m" . PHP_EOL);
     }
 
     private static function useColor(): bool

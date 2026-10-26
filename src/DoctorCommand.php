@@ -7,11 +7,13 @@ namespace SpCrap;
 final class DoctorCommand
 {
     /**
+     * @param array{verbose?: bool, quiet?: bool, logo?: bool} $options
      * @param list<string>|null $loadedExtensions
      */
-    public function run(Io $io, string $workingDir = '', ?array $loadedExtensions = null): int
+    public function run(Io $io, array $options = [], string $workingDir = '', ?array $loadedExtensions = null): int
     {
-        $io->writeln('sp-crap-check — Doctor');
+        Branding::emitForDoctor($io, $options);
+        $io->brandLine($io->brandTitle('Doctor') . ' — environment & PHPUnit crap4j');
         $io->writeln('');
 
         $extensions = $loadedExtensions !== null

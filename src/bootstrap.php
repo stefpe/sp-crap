@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+require __DIR__ . '/Branding.php';
 require __DIR__ . '/MethodMetric.php';
 require __DIR__ . '/Config.php';
 require __DIR__ . '/ConfigLoader.php';
