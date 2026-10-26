@@ -6,7 +6,7 @@ namespace SpCrap;
 
 final class Application
 {
-    private const string VERSION = '1.1.3';
+    private const string VERSION = '1.1.4';
 
     public static function version(): string
     {
@@ -57,7 +57,7 @@ final class Application
             'verbose' => false,
             'quiet' => false,
             'logo' => false,
-            'include-non-public' => false,
+            'public-only' => false,
             'config' => null,
         ];
 
@@ -83,8 +83,8 @@ final class Application
                 continue;
             }
 
-            if ($arg === '--include-non-public') {
-                $options['include-non-public'] = true;
+            if ($arg === '--public-only') {
+                $options['public-only'] = true;
 
                 continue;
             }
@@ -210,8 +210,8 @@ final class Application
         $maxAge = $options['max-age'] ?? $fileConfig->maxAge;
         $publicMethodsOnly = $fileConfig->publicMethodsOnly;
 
-        if ($options['include-non-public']) {
-            $publicMethodsOnly = false;
+        if ($options['public-only']) {
+            $publicMethodsOnly = true;
         }
 
         $runOptions = [
@@ -297,7 +297,7 @@ final class Application
         $io->writeln('  --format=FORMAT        text or json (default: text)');
         $io->writeln('  -v, --verbose          Extra summary + ASCII logo');
         $io->writeln('  --logo                 ASCII logo (also SP_CRAP_LOGO=1)');
-        $io->writeln('  --include-non-public   Gate private/protected methods too');
+        $io->writeln('  --public-only          Only gate public methods (optional filter)');
         $io->writeln('  -q, --quiet            No branding output');
         $io->writeln('  -h, --help             Show this help');
         $io->writeln('  -V, --version          Show version');

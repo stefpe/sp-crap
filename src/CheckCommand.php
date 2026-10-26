@@ -126,7 +126,7 @@ final class CheckCommand
         [$checkedMethods, $ignoredCount] = $this->filterIgnored($methods, $matcher);
         $nonPublicSkipped = 0;
 
-        if ((bool) ($options['public_methods_only'] ?? true)) {
+        if ((bool) ($options['public_methods_only'] ?? false)) {
             ProjectAutoload::registerFromWorkingDirectory();
             [$checkedMethods, $nonPublicSkipped] = (new PublicMethodFilter())->filterToPublicOnly($checkedMethods);
         }
@@ -149,7 +149,7 @@ final class CheckCommand
                 count($checkedMethods),
                 $ignoredCount,
                 $nonPublicSkipped,
-                (bool) ($options['public_methods_only'] ?? true),
+                (bool) ($options['public_methods_only'] ?? false),
                 $violations,
                 $exitCode,
                 $maxViolations,
