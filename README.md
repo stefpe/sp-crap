@@ -32,6 +32,19 @@ Running `sp-crap-check` after coverage gives you a cheap, objective gate:
 
 CRAP is a signal for review and testing focus, not a moral score. Use it to decide where humans (or agents) should add tests or simplify logic—not to chase a number with meaningless assertions.
 
+### Why this saves tokens for AI agents
+
+A crap4j XML file (or an HTML coverage report) is large. Pasting it into a prompt, or asking the model to re-read every method and guess which ones are risky, spends context on data the agent does not need.
+
+`sp-crap-check` does that filtering outside the model. The agent only receives:
+
+- an **exit code** (pass, over budget, or a setup error), and
+- a **short list** of methods that actually exceed the threshold — class, method, CRAP score — or nothing extra when the gate passes.
+
+`--format=json` and `-q` keep that payload machine-readable and free of banners. The agent spends tokens on the few methods worth a test or a split, and leaves the rest of the report on disk.
+
+It combines with tools you already run. **PHPUnit** (with PCOV or Xdebug) writes the crap4j file; `sp-crap-check` only reads that file and applies the threshold. No second test runner, no extra coverage format, and no change to how tests are written.
+
 ## Install with Composer
 
 Project dependency (typical for CI):
